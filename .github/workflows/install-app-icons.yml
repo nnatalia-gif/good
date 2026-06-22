@@ -15,12 +15,7 @@ jobs:
       - uses: actions/checkout@v5
       - name: Build PNG icon set
         run: |
-          cat > app-icon.svg <<'SVG'
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-            <rect width="1024" height="1024" fill="#f1f1eb"/>
-            <circle cx="512" cy="512" r="405" fill="#baff00" stroke="#cfd1c8" stroke-width="3"/>
-            <path fill="#10110f" d="M512 186C528 343 570 456 838 512C570 568 528 681 512 838C496 681 454 568 186 512C454 456 496 343 512 186Z"/>
-          </svg>
+          printf '%s\n' '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#f1f1eb"/><circle cx="512" cy="512" r="405" fill="#baff00" stroke="#cfd1c8" stroke-width="3"/><path fill="#10110f" d="M512 186C528 343 570 456 838 512C570 568 528 681 512 838C496 681 454 568 186 512C454 456 496 343 512 186Z"/></svg>' > app-icon.svg
           convert -background "#f1f1eb" app-icon.svg -resize 1024x1024! png:- > app-icon-1024.png
           convert -background "#f1f1eb" app-icon.svg -resize 512x512! png:- > app-icon-512.png
           convert -background "#f1f1eb" app-icon.svg -resize 192x192! png:- > app-icon-192.png
