@@ -12,7 +12,7 @@ jobs:
   build-icons:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build PNG icon set
         run: |
           cat > app-icon.svg <<'SVG'
@@ -21,10 +21,10 @@ jobs:
             <circle cx="512" cy="512" r="405" fill="#baff00" stroke="#cfd1c8" stroke-width="3"/>
             <path fill="#10110f" d="M512 186C528 343 570 456 838 512C570 568 528 681 512 838C496 681 454 568 186 512C454 456 496 343 512 186Z"/>
           </svg>
-          convert -background none app-icon.svg -resize 1024x1024 app-icon-1024.png
-          convert -background none app-icon.svg -resize 512x512 app-icon-512.png
-          convert -background none app-icon.svg -resize 192x192 app-icon-192.png
-          convert -background none app-icon.svg -resize 180x180 apple-touch-icon.png
+          convert -background "#f1f1eb" app-icon.svg -resize 1024x1024! PNG24:app-icon-1024.png
+          convert -background "#f1f1eb" app-icon.svg -resize 512x512! PNG24:app-icon-512.png
+          convert -background "#f1f1eb" app-icon.svg -resize 192x192! PNG24:app-icon-192.png
+          convert -background "#f1f1eb" app-icon.svg -resize 180x180! PNG24:apple-touch-icon.png
       - name: Commit generated icons
         run: |
           git config user.name github-actions[bot]
