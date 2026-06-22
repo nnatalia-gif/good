@@ -1,0 +1,34 @@
+name: install app icons
+
+on:
+  push:
+    paths:
+      - .github/workflows/install-app-icons.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build-icons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build PNG icon set
+        run: |
+          cat > app-icon.svg <<'SVG'
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+            <rect width="1024" height="1024" fill="#f1f1eb"/>
+            <circle cx="512" cy="512" r="405" fill="#baff00" stroke="#cfd1c8" stroke-width="3"/>
+            <path fill="#10110f" d="M512 186C528 343 570 456 838 512C570 568 528 681 512 838C496 681 454 568 186 512C454 456 496 343 512 186Z"/>
+          </svg>
+          convert -background none app-icon.svg -resize 1024x1024 app-icon-1024.png
+          convert -background none app-icon.svg -resize 512x512 app-icon-512.png
+          convert -background none app-icon.svg -resize 192x192 app-icon-192.png
+          convert -background none app-icon.svg -resize 180x180 apple-touch-icon.png
+      - name: Commit generated icons
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add app-icon.svg app-icon-1024.png app-icon-512.png app-icon-192.png apple-touch-icon.png
+          git commit -m "Add good app icons"
+          git push
