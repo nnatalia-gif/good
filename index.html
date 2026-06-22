@@ -3,6 +3,107 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f1f1eb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="good.">
+  <title>good.</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="app-icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="now" id="nowLabel"></div>
+      <button class="add-button" id="quickAdd" aria-label="add workout">+</button>
+    </header>
+
+    <section class="greeting">
+      <h1 id="greetingText">good morning</h1>
+    </section>
+
+    <section class="overview">
+      <article class="today-card" id="todayCard"></article>
+      <article class="week-card">
+        <div class="card-heading">
+          <div><span>this week</span><b id="weekRange"></b></div>
+          <div class="week-nav"><button id="prevWeek" aria-label="previous week">←</button><button id="nextWeek" aria-label="next week">→</button></div>
+        </div>
+        <div class="week-strip" id="weekStrip"></div>
+        <p class="drag-hint">drag a workout to reschedule</p>
+      </article>
+    </section>
+
+    <section class="calendar-section">
+      <div class="calendar-title">
+        <h2 id="calendarMonth"></h2>
+        <div class="month-nav"><button id="prevMonth" aria-label="previous month">←</button><button id="nextMonth" aria-label="next month">→</button></div>
+      </div>
+      <div class="calendar" id="calendar"></div>
+    </section>
+  </main>
+
+  <dialog id="workoutDialog" class="workout-dialog">
+    <form id="workoutForm">
+      <div class="modal-top">
+        <p id="modalKicker">edit workout</p>
+        <button type="button" class="close-button" id="closeModal" aria-label="close">×</button>
+      </div>
+      <label class="hero-field">workout name<input id="workoutTitle" autocomplete="off" placeholder="low intensity"></label>
+      <div class="field-grid">
+        <label>date<input id="workoutDate" type="date" required></label>
+        <label>time<input id="workoutTime" type="time" required></label>
+      </div>
+      <label>type<select id="workoutType"><option value="low">low intensity</option><option value="moderate">moderate intensity</option><option value="recovery">recovery</option></select></label>
+      <div class="treadmill-block">
+        <div class="block-title"><b>01 · treadmill</b><span>first block</span></div>
+        <div class="field-grid treadmill-fields">
+          <label>mode<select id="treadmillMode"><option value="walk">walk</option><option value="run">run</option></select></label>
+          <label>target<div class="target-control"><input id="treadmillAmount" type="text" inputmode="decimal" placeholder="2.5–3"><select id="treadmillUnit"><option value="km">km</option><option value="mins">mins</option></select></div></label>
+        </div>
+      </div>
+      <div class="exercise-header"><b>exercises</b><span>sets × reps</span></div>
+      <div id="exerciseFields"></div>
+      <button type="button" class="text-button" id="addExercise">+ add exercise</button>
+      <div class="modal-actions">
+        <button type="button" class="delete-button" id="deleteWorkout">delete</button>
+        <span></span>
+        <button type="button" class="save-button" id="saveWorkout" disabled>save workout</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="discardDialog" class="discard-dialog">
+    <div>
+      <span class="warning-mark">!</span>
+      <h3>unsaved changes</h3>
+      <p>save your changes before leaving?</p>
+      <div class="discard-actions"><button id="discardChanges">leave without saving</button><button id="saveChanges">save changes</button></div>
+    </div>
+  </dialog>
+
+  <template id="exerciseTemplate">
+    <div class="exercise-row">
+      <input class="ex-name" placeholder="exercise name" autocomplete="off">
+      <input class="ex-sets numeric" type="number" inputmode="numeric" pattern="[0-9]*" min="1" placeholder="3" aria-label="sets">
+      <span>×</span>
+      <input class="ex-reps numeric" type="text" inputmode="numeric" pattern="[0-9–-]*" placeholder="10" aria-label="reps">
+      <button type="button" class="remove-ex" aria-label="remove exercise">×</button>
+    </div>
+  </template>
+  <script src="app.js"></script>
+</body>
+</html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#f2f2ed">
   <title>workout plan</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
