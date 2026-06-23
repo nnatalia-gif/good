@@ -3,6 +3,11 @@ const initialWorkouts=[
  {id:'w2',date:'2026-06-25',time:'11:00',type:'moderate',title:'repetition · moderate intensity',treadmill:{mode:'walk',amount:'2.5–3',unit:'km'},exercises:[['row',3,'10'],['seated dumbbell bicep curls',3,'10'],['squats',3,'8–10'],['seated calf raises',3,'15']]},
  {id:'w3',date:'2026-06-27',time:'15:30',type:'recovery',title:'recovery session',treadmill:{mode:'walk',amount:'30',unit:'mins'},exercises:[['swim or bike ride',1,'30']]}
 ];
+const cloudConfig={
+ url:'https://agasdobscsvohgwsehhb.supabase.co',
+ anonKey:'sb_publishable_ltaNA7nnVozoSCOcZIjg',
+ planId:'good'
+};
 const storageKey='workout-plan-v3';
 let workouts=JSON.parse(localStorage.getItem(storageKey)||'null')||initialWorkouts;
 let calendarCursor=new Date('2026-06-01T12:00:00');
@@ -20,7 +25,11 @@ const todayIso=bangkokNow().iso;
 function bangkokNow(){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',hourCycle:'h23',minute:'2-digit',weekday:'long'}).formatToParts(new Date());const get=t=>parts.find(p=>p.type===t)?.value;return{iso:`${get('year')}-${get('month')}-${get('day')}`,hour:+get('hour'),minute:get('minute'),weekday:get('weekday')}}
 function dateOf(iso){return new Date(`${iso}T12:00:00`)}
 function isoOf(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-function persist(){localStorage.setItem(storageKey,JSON.stringify(workouts))}
+function cloudReady(){return cloudConfig.url&&cloudConfig.anonKey}
+function cloudHeaders(extra={}){return{apikey:cloudConfig.anonKey,Authorization:`Bearer ${cloudConfig.anonKey}`,'Content-Type':'application/json',...extra}}
+async function loadCloudWorkouts(){if(!cloudReady())return;try{const response=await fetch(`${cloudConfig.url}/rest/v1/plans?id=eq.${encodeURIComponent(cloudConfig.planId)}&select=workouts`,{headers:cloudHeaders()});if(!response.ok)throw new Error('cloud load failed');const rows=await response.json();if(Array.isArray(rows?.[0]?.workouts)){workouts=rows[0].workouts;localStorage.setItem(storageKey,JSON.stringify(workouts));renderAll()}}catch(error){console.warn('using local workout plan',error)}}
+async function saveCloudWorkouts(){if(!cloudReady())return;const response=await fetch(`${cloudConfig.url}/rest/v1/plans?id=eq.${encodeURIComponent(cloudConfig.planId)}`,{method:'PATCH',headers:cloudHeaders({'Prefer':'return=minimal'}),body:JSON.stringify({workouts,updated_at:new Date().toISOString()})});if(!response.ok)throw new Error('cloud save failed')}
+function persist(){localStorage.setItem(storageKey,JSON.stringify(workouts));saveCloudWorkouts().catch(error=>console.warn('saved locally only',error))}
 function lower(s=''){return s.toLocaleLowerCase('en')}
 function setGreeting(){const n=bangkokNow();let period,icon;if(n.hour>=5&&n.hour<12){period='morning';icon='sun'}else if(n.hour>=12&&n.hour<16){period='afternoon';icon='day'}else if(n.hour>=16&&n.hour<22){period='evening';icon='evening'}else{period='night';icon='night'}const heading=$('#greetingText');heading.setAttribute('aria-label',`good ${period}`);heading.innerHTML=`<span class="greeting-word">g<span class="letter-icon ${icon}" aria-hidden="true"></span>od</span><span class="greeting-period">${period}</span>`;const d=dateOf(n.iso);$('#nowLabel').textContent=`${dayNames[d.getDay()]} · ${d.getDate()} ${months[d.getMonth()]} · ${String(n.hour).padStart(2,'0')}:${n.minute} bangkok`}
 function weekStart(iso){const d=dateOf(iso),offset=(d.getDay()+6)%7;d.setDate(d.getDate()-offset);return d}
@@ -40,3 +49,4 @@ function saveCurrent(){const data=JSON.parse(formState()),id=$('#workoutForm').d
 function requestClose(){if(markDirty()){pendingClose=true;$('#discardDialog').showModal()}else $('#workoutDialog').close()}
 $('#workoutForm').addEventListener('input',markDirty);$('#workoutForm').addEventListener('change',markDirty);$('#workoutForm').addEventListener('submit',e=>e.preventDefault());$('#addExercise').onclick=()=>{addExerciseRow();markDirty()};$('#saveWorkout').onclick=saveCurrent;$('#closeModal').onclick=requestClose;$('#workoutDialog').addEventListener('cancel',e=>{e.preventDefault();requestClose()});$('#discardChanges').onclick=()=>{originalSnapshot=formState();$('#discardDialog').close();$('#workoutDialog').close();pendingClose=false};$('#saveChanges').onclick=()=>{$('#discardDialog').close();saveCurrent();pendingClose=false};$('#deleteWorkout').onclick=()=>{const id=$('#workoutForm').dataset.id;workouts=workouts.filter(w=>w.id!==id);persist();originalSnapshot=formState();$('#workoutDialog').close();renderAll()};$('#quickAdd').onclick=()=>openCreate(todayIso);$('#prevWeek').onclick=()=>{weekCursor.setDate(weekCursor.getDate()-7);renderWeek()};$('#nextWeek').onclick=()=>{weekCursor.setDate(weekCursor.getDate()+7);renderWeek()};$('#prevMonth').onclick=()=>{calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()-1,1,12);renderCalendar()};$('#nextMonth').onclick=()=>{calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+1,1,12);renderCalendar()};
 renderAll();
+loadCloudWorkouts();
