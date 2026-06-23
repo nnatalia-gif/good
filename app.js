@@ -5,7 +5,7 @@ const initialWorkouts=[
 ];
 const cloudConfig={
  url:'https://agasdobscsvohgwsehhb.supabase.co',
- anonKey:'sb_publishable_ltaNA7nnVozoSCOcZIjg',
+ anonKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFnYXNkb2JzY3N2b2hnd3NlaGhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMDk5NTksImV4cCI6MjA5Nzc4NTk1OX0.Eyg2pWFYuynI-z9oyjRDxteN3ep2Zsl8S3oUEDRTXZM',
  planId:'good'
 };
 const storageKey='workout-plan-v3';
@@ -26,7 +26,7 @@ function bangkokNow(){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asi
 function dateOf(iso){return new Date(`${iso}T12:00:00`)}
 function isoOf(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function cloudReady(){return cloudConfig.url&&cloudConfig.anonKey}
-function cloudHeaders(extra={}){return{apikey:cloudConfig.anonKey,'Content-Type':'application/json',...extra}}
+function cloudHeaders(extra={}){return{apikey:cloudConfig.anonKey,Authorization:`Bearer ${cloudConfig.anonKey}`,'Content-Type':'application/json',...extra}}
 async function loadCloudWorkouts(){if(!cloudReady())return;try{const response=await fetch(`${cloudConfig.url}/rest/v1/plans?id=eq.${encodeURIComponent(cloudConfig.planId)}&select=workouts`,{headers:cloudHeaders()});if(!response.ok)throw new Error('cloud load failed');const rows=await response.json();if(Array.isArray(rows?.[0]?.workouts)){workouts=rows[0].workouts;localStorage.setItem(storageKey,JSON.stringify(workouts));renderAll()}}catch(error){console.warn('using local workout plan',error)}}
 async function saveCloudWorkouts(){if(!cloudReady())return;const response=await fetch(`${cloudConfig.url}/rest/v1/plans?id=eq.${encodeURIComponent(cloudConfig.planId)}`,{method:'PATCH',headers:cloudHeaders({'Prefer':'return=minimal'}),body:JSON.stringify({workouts,updated_at:new Date().toISOString()})});if(!response.ok)throw new Error('cloud save failed')}
 function persist(){localStorage.setItem(storageKey,JSON.stringify(workouts));saveCloudWorkouts().catch(error=>console.warn('saved locally only',error))}
