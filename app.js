@@ -10,7 +10,8 @@ const cloudConfig={
 };
 const storageKey='workout-plan-v3';
 let workouts=JSON.parse(localStorage.getItem(storageKey)||'null')||initialWorkouts;
-let calendarCursor=new Date('2026-06-01T12:00:00');
+let calendarCursor=dateOf(bangkokNow().iso);
+calendarCursor.setDate(1);
 let weekCursor=weekStart(bangkokNow().iso);
 let originalSnapshot='';
 let pendingClose=false;
